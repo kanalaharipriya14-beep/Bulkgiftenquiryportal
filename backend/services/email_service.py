@@ -1,4 +1,5 @@
-import smtplib
+import os
+import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
@@ -6,8 +7,39 @@ import threading
 from config import Config
 from db import execute_query
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+def get_gmail_service():
+    creds = None
+    token_json = os.environ.get("GMAIL_TOKEN_JSON")
+    
+    if token_json:
+        import json
+        info = json.loads(token_json)
+        creds = Credentials.from_authorized_user_info(info, SCOPES)
+    elif os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            logger.error("No valid credentials found. Run auth_setup.py locally or set GMAIL_TOKEN_JSON in production.")
+            return None
+    try:
+        service = build("gmail", "v1", credentials=creds)
+        return service
+    except HttpError as error:
+        logger.error(f"An error occurred: {error}")
+        return None
 
 def log_email(enquiry_id, receiver_email, subject, status):
     """Saves the log of the email transaction in the database."""
@@ -22,19 +54,13 @@ def log_email(enquiry_id, receiver_email, subject, status):
         logger.error(f"Failed to log email to database: {e}")
 
 def send_email(enquiry_id, receiver_email, subject, html_content):
-    """Sends an email using Gmail SMTP and logs the result, preventing duplicates."""
+    """Sends an email using Gmail API and logs the result, preventing duplicates."""
     
     # Check for duplicate email to avoid spamming the client
     check_query = "SELECT id FROM email_logs WHERE enquiry_id = %s AND subject = %s AND status = 'Sent'"
     existing = execute_query(check_query, (enquiry_id, subject), fetch_all=False, fetch_one=True)
     if existing:
         logger.info(f"Email with subject '{subject}' already sent for enquiry {enquiry_id}. Skipping duplicate send.")
-        return True
-
-    # Check if configurations are set
-    if not Config.MAIL_APP_PASSWORD:
-        logger.warning("SMTP Mail password not set in environment. Mocking successful email send.")
-        log_email(enquiry_id, receiver_email, subject, "Mocked (No Credentials)")
         return True
 
     msg = MIMEMultipart("alternative")
@@ -46,23 +72,25 @@ def send_email(enquiry_id, receiver_email, subject, html_content):
     msg.attach(part)
 
     try:
-        logger.info(f"Connecting to SMTP server {Config.SMTP_SERVER}:{Config.SMTP_PORT}...")
-        # Add 10-second timeout to prevent SMTP server issues from freezing the API route
-        server = smtplib.SMTP(Config.SMTP_SERVER, Config.SMTP_PORT, timeout=10)
-        server.ehlo()
-        if Config.MAIL_USE_TLS:
-            server.starttls()
-            server.ehlo()
-        
-        server.login(Config.MAIL_USERNAME, Config.MAIL_APP_PASSWORD)
-        server.sendmail(Config.MAIL_USERNAME, receiver_email, msg.as_string())
-        server.quit()
-        
-        logger.info(f"Email sent successfully to {receiver_email}")
+        service = get_gmail_service()
+        if not service:
+            logger.error("Could not get Gmail service. Check token.json.")
+            log_email(enquiry_id, receiver_email, subject, "Failed - Auth Error")
+            return False
+
+        encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+        create_message = {'raw': encoded_message}
+
+        send_message = (service.users().messages().send(userId="me", body=create_message).execute())
+        logger.info(f"Email sent successfully to {receiver_email}. Message Id: {send_message['id']}")
         log_email(enquiry_id, receiver_email, subject, "Sent")
         return True
+    except HttpError as error:
+        logger.error(f"Failed to send email to {receiver_email}: {error}")
+        log_email(enquiry_id, receiver_email, subject, "Failed")
+        return False
     except Exception as e:
-        logger.error(f"Failed to send email to {receiver_email}: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
         log_email(enquiry_id, receiver_email, subject, "Failed")
         return False
 
