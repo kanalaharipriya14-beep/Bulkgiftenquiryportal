@@ -80,7 +80,9 @@ async function request(path, options = {}) {
       .then(freshData => {
         apiCache.set(cacheKey, freshData);
       })
-      .catch(err => console.error("SWR background refresh failed:", err));
+      .catch(() => {
+        // Silently ignore SWR background refresh failures
+      });
       
     // Return stale data immediately (resolves instantly)
     return apiCache.get(cacheKey);
