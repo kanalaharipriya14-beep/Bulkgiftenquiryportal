@@ -1,10 +1,12 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+// In-memory cache for Zero-Latency navigation (SWR Pattern)
+const apiCache = new Map();
+
 /**
- * Helper to perform HTTP requests and return JSON.
+ * Core fetch implementation
  */
-async function request(path, options = {}) {
-  const url = `${API_BASE_URL}${path}`;
+async function executeFetch(url, options) {
   const headers = {
     ...options.headers,
   };
@@ -31,17 +33,15 @@ async function request(path, options = {}) {
         const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
       } catch {
-        // If response is not JSON
         try {
           errorMessage = await response.text();
         } catch {
-          // Fallback when response text cannot be parsed
+          // Fallback
         }
       }
       throw new Error(errorMessage);
     }
 
-    // Handle CSV attachment response or binary data
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("text/csv")) {
       return response.blob();
@@ -55,6 +55,41 @@ async function request(path, options = {}) {
     }
     throw error;
   }
+}
+
+/**
+ * Helper to perform HTTP requests with SWR Caching
+ */
+async function request(path, options = {}) {
+  const url = `${API_BASE_URL}${path}`;
+  const method = options.method || "GET";
+
+  // Invalidate cache immediately on any mutation to ensure fresh data
+  if (method !== "GET") {
+    apiCache.clear();
+    return executeFetch(url, options);
+  }
+
+  // Stale-While-Revalidate (SWR) logic for GET requests
+  const cacheKey = url;
+  
+  // If we have cached data, return it instantly for zero-latency UI
+  if (apiCache.has(cacheKey)) {
+    // Silently re-fetch in the background to update the cache for the next time
+    executeFetch(url, options)
+      .then(freshData => {
+        apiCache.set(cacheKey, freshData);
+      })
+      .catch(err => console.error("SWR background refresh failed:", err));
+      
+    // Return stale data immediately (resolves instantly)
+    return apiCache.get(cacheKey);
+  }
+
+  // If no cache exists, fetch, cache, and return
+  const data = await executeFetch(url, options);
+  apiCache.set(cacheKey, data);
+  return data;
 }
 
 export const api = {
