@@ -28,7 +28,7 @@ export default function DesignApprovalTracker({ isAdmin }) {
     setLoading(true);
     try {
       const perData = await api.getPersonalizations();
-      setPersonalizations(perData.filter(p => p.status === 'Approved' || p.status === 'Design Review'));
+      setPersonalizations(perData);
       
       const appData = await api.getDesignApprovals();
       setApprovals(appData);
