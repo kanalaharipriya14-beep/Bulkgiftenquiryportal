@@ -72,17 +72,11 @@ export default function SalesDashboard({ onViewDetails }) {
 
   // Trigger load on mounting & filter updates
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchCounts();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchCounts();
   }, [fetchCounts]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchEnquiries();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchEnquiries();
   }, [fetchEnquiries]);
 
   const handleRefresh = () => {

@@ -109,10 +109,7 @@ export default function DetailPage({ enquiryId, onBack }) {
   }, [enquiryId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchDetails();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchDetails();
   }, [fetchDetails]);
 
   // Handle Workflow Details Update (Status, Owner, Priority)

@@ -1,5 +1,6 @@
+import { memo } from "react";
 
-export default function KPICard({ title, count, icon, color = "#0284c7" }) {
+const KPICard = memo(function KPICard({ title, count, icon, color = "#0284c7" }) {
   return (
     <div style={styles.card} className="card premium-card hover-lift animated-fade">
       <div style={styles.content}>
@@ -11,7 +12,9 @@ export default function KPICard({ title, count, icon, color = "#0284c7" }) {
       </div>
     </div>
   );
-}
+});
+
+export default KPICard;
 
 const styles = {
   card: {

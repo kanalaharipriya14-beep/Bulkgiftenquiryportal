@@ -121,21 +121,15 @@ export default function WorkflowScreen({ preselectedEnquiryId, onViewDetails }) 
   }, [showToast]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchList();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchList();
   }, [fetchList]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (selectedId) {
-        fetchEnquiryDetails(selectedId);
-      } else {
-        setDetailData(null);
-      }
-    }, 0);
-    return () => clearTimeout(timer);
+    if (selectedId) {
+      fetchEnquiryDetails(selectedId);
+    } else {
+      setDetailData(null);
+    }
   }, [selectedId, fetchEnquiryDetails]);
 
   // Sync search input value with selected enquiry

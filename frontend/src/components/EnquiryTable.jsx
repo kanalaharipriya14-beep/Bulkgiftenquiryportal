@@ -1,6 +1,7 @@
+import { memo } from "react";
 import StatusBadge from "./StatusBadge";
 
-export default function EnquiryTable({ enquiries, onViewDetails }) {
+const EnquiryTable = memo(function EnquiryTable({ enquiries, onViewDetails }) {
   if (!enquiries || enquiries.length === 0) {
     return (
       <div style={styles.emptyState}>
@@ -97,7 +98,9 @@ export default function EnquiryTable({ enquiries, onViewDetails }) {
       </table>
     </div>
   );
-}
+});
+
+export default EnquiryTable;
 
 const styles = {
   emptyState: {

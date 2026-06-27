@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
-import EnquiryForm from "./pages/EnquiryForm";
-import WorkflowScreen from "./pages/WorkflowScreen";
-import SalesDashboard from "./pages/SalesDashboard";
-import DetailPage from "./pages/DetailPage";
-import ProductPersonalizationManager from "./pages/ProductPersonalizationManager";
-import DesignApprovalTracker from "./pages/DesignApprovalTracker";
-import InventoryScreen from "./pages/InventoryScreen";
-import OccasionCalendar from "./pages/OccasionCalendar";
-import ReturnRequestPage from "./pages/ReturnRequestPage";
-import LoginScreen from "./pages/LoginScreen";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+// Lazy load pages for lightning-fast initial load
+const EnquiryForm = lazy(() => import("./pages/EnquiryForm"));
+const WorkflowScreen = lazy(() => import("./pages/WorkflowScreen"));
+const SalesDashboard = lazy(() => import("./pages/SalesDashboard"));
+const DetailPage = lazy(() => import("./pages/DetailPage"));
+const ProductPersonalizationManager = lazy(() => import("./pages/ProductPersonalizationManager"));
+const DesignApprovalTracker = lazy(() => import("./pages/DesignApprovalTracker"));
+const InventoryScreen = lazy(() => import("./pages/InventoryScreen"));
+const OccasionCalendar = lazy(() => import("./pages/OccasionCalendar"));
+const ReturnRequestPage = lazy(() => import("./pages/ReturnRequestPage"));
+const LoginScreen = lazy(() => import("./pages/LoginScreen"));
 
 export default function App() {
   const [view, setView] = useState("enquiry"); // views: 'enquiry', 'workflow', 'dashboard', 'detail', 'login'
@@ -135,7 +138,9 @@ export default function App() {
       
       {/* Main semantic workspace */}
       <main className="main-content">
-        {renderActiveScreen()}
+        <Suspense fallback={<LoadingSpinner message="Loading workspace..." />}>
+          {renderActiveScreen()}
+        </Suspense>
       </main>
     </div>
   );
