@@ -19,6 +19,17 @@ export default function App() {
   const [selectedEnquiryId, setSelectedEnquiryId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Keep backend warm to prevent cold starts during presentation
+  useEffect(() => {
+    import("./services/api").then(({ api }) => {
+      api.pingBackend().catch(() => {}); // Initial ping
+      const interval = setInterval(() => {
+        api.pingBackend().catch(() => {});
+      }, 240000); // Ping every 4 minutes (240,000ms)
+      return () => clearInterval(interval);
+    });
+  }, []);
+
   // Sync document title and meta description for SEO when view changes
   useEffect(() => {
     let title = "Paper Plane | Bulk Gifting Enquiry Portal";

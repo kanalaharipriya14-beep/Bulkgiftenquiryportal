@@ -178,6 +178,11 @@ export const api = {
     return `${API_BASE_URL}/api/export/csv`;
   },
 
+  // Keep Backend Warm
+  pingBackend: () => {
+    return request("/health");
+  },
+
   // --- New Advanced Features APIs ---
 
   // Personalizations
