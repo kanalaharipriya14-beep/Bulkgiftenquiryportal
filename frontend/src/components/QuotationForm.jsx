@@ -13,7 +13,6 @@ export default function QuotationForm({ enquiry, initialQuotation, onSave, isLoa
 
   // Populate form fields from initialQuotation or evaluate defaults
   useEffect(() => {
-    const timer = setTimeout(() => {
       if (initialQuotation) {
         setProposedPackage(initialQuotation.proposed_package || "");
         setPricePerGift(Number(initialQuotation.price_per_gift) || 0);
@@ -36,8 +35,6 @@ export default function QuotationForm({ enquiry, initialQuotation, onSave, isLoa
         setQuotationStatus("Draft");
         setNotes("");
       }
-    }, 0);
-    return () => clearTimeout(timer);
   }, [initialQuotation, enquiry]);
 
   // Calculate subtotal, GST, and grand total dynamically
