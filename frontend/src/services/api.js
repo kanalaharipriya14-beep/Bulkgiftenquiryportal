@@ -16,7 +16,7 @@ async function executeFetch(url, options) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), options.timeout || 30000);
+  const timeoutId = setTimeout(() => controller.abort(), options.timeout || 60000);
 
   try {
     const response = await fetch(url, {
