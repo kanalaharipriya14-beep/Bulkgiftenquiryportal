@@ -83,20 +83,23 @@ export default function DesignApprovalTracker({ isAdmin }) {
     }
   };
 
-  const updateStatus = async (designId, status) => {
-    try {
-      const updateData = { status };
-      if (status === 'Changes Requested' || status === 'Approved') {
-        updateData.customer_comments = feedback[designId] || "";
-      }
-      
-      await api.updateDesignApproval(designId, updateData);
-      setSuccess(`Design marked as ${status}`);
-      setFeedback(prev => ({ ...prev, [designId]: "" }));
-      fetchData();
-    } catch (err) {
-      setError("Failed to update design status: " + err.message);
+  const updateStatus = (designId, status) => {
+    // Optimistic UI Update immediately
+    setApprovals(prev => prev.map(app => app.design_id === designId ? { ...app, status: status } : app));
+    setSuccess(`Design marked as ${status}`);
+    const currentFeedback = feedback[designId];
+    setFeedback(prev => ({ ...prev, [designId]: "" }));
+
+    const updateData = { status };
+    if (status === 'Changes Requested' || status === 'Approved') {
+      updateData.customer_comments = currentFeedback || "";
     }
+      
+    // Fire API in background
+    api.updateDesignApproval(designId, updateData).catch(err => {
+      setError("Background update failed: " + err.message);
+      fetchData(); // revert on fail
+    });
   };
 
   return (
@@ -148,9 +151,7 @@ export default function DesignApprovalTracker({ isAdmin }) {
           <div style={{ flex: 1.5, backgroundColor: "white", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             <h3 style={{ marginBottom: "1.5rem", fontSize: "1.25rem" }}>Review Designs</h3>
             
-            {loading && approvals.length === 0 ? (
-              <p>Loading designs...</p>
-            ) : approvals.length === 0 ? (
+            {approvals.length === 0 && !loading ? (
               <p style={{ color: "var(--text-muted)" }}>No design mockups uploaded yet.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>

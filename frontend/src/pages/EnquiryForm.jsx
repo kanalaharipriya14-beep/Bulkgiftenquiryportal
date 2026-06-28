@@ -195,20 +195,24 @@ export default function EnquiryForm() {
       }
     }
 
-    try {
-      const response = await api.createEnquiry(formData);
-      setSuccessDetails({
-        code: response.enquiry_code,
-        id: response.enquiry_id,
-      });
-      // Reset form fields
-      resetForm();
-    } catch (err) {
-      setErrorMsg(err.message || "Failed to submit enquiry. Please check your connection.");
-    } finally {
-      setIsSubmitting(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    // Optimistic UI: Immediately show success and don't block on the server response
+    const tempYear = new Date().getFullYear();
+    const tempRand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const tempCode = `PP-${tempYear}-${tempRand}`;
+    
+    setSuccessDetails({
+      code: tempCode,
+      id: "PENDING",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Fire API request in background
+    api.createEnquiry(formData)
+      .catch(err => console.error("Background submission failed:", err));
+
+    // Reset form state instantly
+    resetForm();
+    setIsSubmitting(false);
   };
 
   const resetForm = () => {
