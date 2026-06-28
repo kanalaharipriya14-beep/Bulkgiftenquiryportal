@@ -31,7 +31,7 @@ export default function OccasionCalendar() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     fetchOccasions();
   }, []);
 

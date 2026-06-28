@@ -137,7 +137,7 @@ export default function WorkflowScreen({ preselectedEnquiryId, onViewDetails }) 
     if (selectedId && enquiries.length > 0) {
       const enq = enquiries.find((e) => e.id.toString() === selectedId.toString());
       if (enq) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setSearchValue(`${enq.enquiry_code} — ${enq.company_name}`);
       }
     }

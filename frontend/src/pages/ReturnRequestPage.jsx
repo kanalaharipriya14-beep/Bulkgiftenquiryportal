@@ -46,7 +46,7 @@ export default function ReturnRequestPage({ isAdmin }) {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     fetchReturns();
     fetchEnquiries();
   }, []);
