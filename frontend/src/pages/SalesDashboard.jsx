@@ -128,84 +128,78 @@ export default function SalesDashboard({ onViewDetails }) {
       </div>
 
       {/* KPI Cards section */}
-      {isLoadingCounts ? (
-        <LoadingSpinner message="Aggregating metrics summary counts..." />
-      ) : (
-        <div style={styles.kpiContainer}>
-          <KPICard
-            title="Total Enquiries"
-            count={metrics.total_enquiries}
-            icon="📋"
-            color="#0284c7"
-          />
-          <KPICard
-            title="Pending Enquiries"
-            count={metrics.pending_enquiries}
-            icon="⏳"
-            color="#f59e0b"
-          />
-          <KPICard
-            title="Quotations Prepared"
-            count={metrics.quotations_prepared}
-            icon="📝"
-            color="#8b5cf6"
-          />
-          <KPICard
-            title="Follow-ups Required"
-            count={metrics.followups_required}
-            icon="📞"
-            color="#f97316"
-          />
-          <KPICard
-            title="Converted Orders"
-            count={metrics.converted_orders}
-            icon="🎉"
-            color="#10b981"
-          />
-        </div>
-      )}
+      <div style={styles.kpiContainer}>
+        <KPICard
+          title="Total Enquiries"
+          count={metrics.total_enquiries}
+          icon="📋"
+          color="#0284c7"
+        />
+        <KPICard
+          title="Pending Enquiries"
+          count={metrics.pending_enquiries}
+          icon="⏳"
+          color="#f59e0b"
+        />
+        <KPICard
+          title="Quotations Prepared"
+          count={metrics.quotations_prepared}
+          icon="📝"
+          color="#8b5cf6"
+        />
+        <KPICard
+          title="Follow-ups Required"
+          count={metrics.followups_required}
+          icon="📞"
+          color="#f97316"
+        />
+        <KPICard
+          title="Converted Orders"
+          count={metrics.converted_orders}
+          icon="🎉"
+          color="#10b981"
+        />
+      </div>
 
       {/* Advanced Modules KPIs */}
-      {!isLoadingCounts && (
-        <div style={{ ...styles.kpiContainer, marginTop: "-1rem", marginBottom: "2rem" }}>
-          <KPICard
-            title="Personalizations"
-            count={metrics.total_personalizations}
-            icon="✍️"
-            color="#6366f1"
-          />
-          <KPICard
-            title="Design Approvals"
-            count={metrics.pending_approvals}
-            icon="✅"
-            color="#ec4899"
-          />
-          <KPICard
-            title="Total Inventory"
-            count={metrics.inventory_count}
-            icon="📦"
-            color="#3b82f6"
-          />
-          <KPICard
-            title="Low Stock"
-            count={metrics.low_stock}
-            icon="⚠️"
-            color="#ef4444"
-          />
-          <KPICard
-            title="Upcoming Occasions"
-            count={metrics.upcoming_occasions}
-            icon="📅"
-            color="#14b8a6"
-          />
-          <KPICard
-            title="Pending Returns"
-            count={metrics.pending_returns}
-            icon="↩️"
-            color="#f59e0b"
-          />
-        </div>
-      )}
+      <div style={{ ...styles.kpiContainer, marginTop: "-1rem", marginBottom: "2rem" }}>
+        <KPICard
+          title="Personalizations"
+          count={metrics.total_personalizations}
+          icon="✍️"
+          color="#6366f1"
+        />
+        <KPICard
+          title="Design Approvals"
+          count={metrics.pending_approvals}
+          icon="✅"
+          color="#ec4899"
+        />
+        <KPICard
+          title="Total Inventory"
+          count={metrics.inventory_count}
+          icon="📦"
+          color="#3b82f6"
+        />
+        <KPICard
+          title="Low Stock"
+          count={metrics.low_stock}
+          icon="⚠️"
+          color="#ef4444"
+        />
+        <KPICard
+          title="Upcoming Occasions"
+          count={metrics.upcoming_occasions}
+          icon="📅"
+          color="#14b8a6"
+        />
+        <KPICard
+          title="Pending Returns"
+          count={metrics.pending_returns}
+          icon="↩️"
+          color="#f59e0b"
+        />
+      </div>
 
       {/* Filter Workspace */}
       <div className="card premium-card hover-lift" style={styles.filterCard}>
@@ -283,15 +277,15 @@ export default function SalesDashboard({ onViewDetails }) {
       </div>
 
       {/* Main Records Table */}
-      {isLoadingTable ? (
-        <LoadingSpinner message="Fetching matching enquiry records list..." />
-      ) : errorMsg ? (
+      {errorMsg ? (
         <div style={styles.errorContainer} className="card premium-card">
           <span style={styles.errorIcon}>⚠️</span>
           <p>{errorMsg}</p>
         </div>
       ) : (
-        <EnquiryTable enquiries={enquiries} onViewDetails={onViewDetails} />
+        <div style={{ opacity: isLoadingTable ? 0.6 : 1, transition: "opacity 0.2s" }}>
+          <EnquiryTable enquiries={enquiries} onViewDetails={onViewDetails} />
+        </div>
       )}
     </div>
   );

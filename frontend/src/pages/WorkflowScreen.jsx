@@ -302,12 +302,8 @@ export default function WorkflowScreen({ preselectedEnquiryId, onViewDetails }) 
     return WORKFLOW_STAGES.findIndex(s => s.key === cleanVal);
   };
 
-  if (isLoadingList) {
-    return <LoadingSpinner message="Loading workflow registry..." />;
-  }
-
   return (
-    <div className="workflow-page-container animated-fade">
+    <div className="workflow-page-container animated-fade" style={{ opacity: isLoadingList ? 0.6 : 1, transition: "opacity 0.2s" }}>
       {toastMsg && (
         <MessageToast message={toastMsg} type={toastType} onClose={() => setToastMsg("")} />
       )}
@@ -361,10 +357,8 @@ export default function WorkflowScreen({ preselectedEnquiryId, onViewDetails }) 
           <h3>No Active Enquiry Selected</h3>
           <p>Please select a corporate enquiry from the dropdown above to manage its process workflow.</p>
         </div>
-      ) : isLoadingDetails ? (
-        <LoadingSpinner message="Opening pipeline stages..." />
       ) : (
-        <>
+        <div style={{ opacity: isLoadingDetails ? 0.6 : 1, transition: "opacity 0.2s" }}>
           {/* Section 1: Workflow Timeline */}
           <div className="workflow-section-timeline">
             <div className="card premium-card" style={{ padding: "2rem", margin: 0 }}>
@@ -628,7 +622,7 @@ export default function WorkflowScreen({ preselectedEnquiryId, onViewDetails }) 
             </div>
 
           </div>
-        </>
+        </div>
       )}
     </div>
   );

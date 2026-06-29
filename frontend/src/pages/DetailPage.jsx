@@ -28,7 +28,13 @@ const getStageIndex = (statusValue) => {
 };
 
 export default function DetailPage({ enquiryId, onBack }) {
-  const [data, setData] = useState(null); // { enquiry, quotation, recommendations, workflow_history, email_logs }
+  const [data, setData] = useState({
+    enquiry: { company_name: "Loading...", enquiry_code: "...", created_at: "...", status: "Loading", priority: "Medium", quantity: 0, budget_per_gift: 0, branding_required: "No", delivery_date: "..." },
+    quotation: null,
+    recommendations: [],
+    workflow_history: [],
+    email_logs: []
+  }); // { enquiry, quotation, recommendations, workflow_history, email_logs }
 
   const { enquiry, quotation } = data || {};
 
@@ -237,11 +243,7 @@ export default function DetailPage({ enquiryId, onBack }) {
     }).format(val);
   };
 
-  if (isLoading) {
-    return <LoadingSpinner message="Fetching customer records, logs, and billing history..." />;
-  }
-
-  if (errorMsg || !data) {
+  if (errorMsg) {
     return (
       <div style={styles.errorContainer} className="card premium-card">
         <h3>⚠️ Detailed record retrieval failed</h3>
@@ -263,7 +265,7 @@ export default function DetailPage({ enquiryId, onBack }) {
   const pGst = (pricingBreakdown.gst / totalForPercent) * 100;
 
   return (
-    <div className="animated-fade">
+    <div className="animated-fade" style={{ opacity: isLoading ? 0.6 : 1, transition: "opacity 0.2s" }}>
       {toastMsg && (
         <MessageToast message={toastMsg} type={toastType} onClose={() => setToastMsg("")} />
       )}
