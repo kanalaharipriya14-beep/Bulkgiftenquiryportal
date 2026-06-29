@@ -28,7 +28,8 @@ export default function DesignApprovalTracker({ isAdmin }) {
     setLoading(true);
     try {
       const perData = await api.getPersonalizations();
-      setPersonalizations(perData.filter(p => p.status === 'Approved' || p.status === 'Design Review'));
+      // Show personalizations that need design work (not completed)
+      setPersonalizations(perData.filter(p => p.status !== 'Completed'));
       
       const appData = await api.getDesignApprovals();
       setApprovals(appData);
@@ -103,7 +104,7 @@ export default function DesignApprovalTracker({ isAdmin }) {
   };
 
   return (
-    <div className="animated-fade">
+    <div className="animated-fade" style={{ opacity: loading ? 0.6 : 1, transition: "opacity 0.2s" }}>
       <div style={{ padding: "1rem 2rem" }}>
         <h2 style={{ fontSize: "1.75rem", fontWeight: "700", color: "var(--primary-dark)" }}>Design Approval Tracker</h2>
         <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>Upload mockups and track client feedback and approvals.</p>
