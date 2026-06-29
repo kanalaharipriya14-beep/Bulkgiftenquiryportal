@@ -48,8 +48,13 @@ def health_check():
 @app.route("/uploads/<path:filename>", methods=["GET"])
 def serve_upload(filename):
     """Serves uploaded logo images from the uploads directory."""
-    from flask import send_from_directory
+    from flask import send_from_directory, redirect
     upload_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+    
+    # Render uses an ephemeral filesystem. If the file was wiped during a deploy, serve a fallback placeholder.
+    if not os.path.exists(os.path.join(upload_path, filename)):
+        return redirect("https://placehold.co/600x400/eeeeee/666666.png?text=Mockup+File+(Placeholder)")
+        
     return send_from_directory(upload_path, filename)
 
 @app.route("/api/health/db", methods=["GET"])
